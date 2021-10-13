@@ -1,0 +1,29 @@
+version: "3.2"
+
+services:
+  web_db:
+    image: mariadb:5.5.64
+    environment:
+      MYSQL_ROOT_PASSWORD: webmotion
+      MYSQL_DATABASE: webmotion
+      MYSQL_USER: webmotion
+      MYSQL_PASSWORD: webmotion
+    ports:
+      - "9906:3306"
+    container_name: webmotion_mysql
+    restart: always
+    volumes:
+      - mysql_vol:/var/lib/mysql
+  backend:
+    image: webmotion
+    container_name: webmotion_module
+    depends_on:
+      - web_db
+    volumes:
+      - ./symfony/:/var/www/html/
+    ports:
+      - "80:80"
+      - "443:443"
+
+volumes:
+  mysql_vol: {}
