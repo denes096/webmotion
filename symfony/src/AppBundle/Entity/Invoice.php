@@ -1,8 +1,10 @@
 <?php
 
 namespace AppBundle\Entity;
+use Symfony\Component\Validator\Constraints as Assert;
 
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
 /**
  * Invoice
@@ -12,7 +14,7 @@ use Doctrine\ORM\Mapping as ORM;
  */
 class Invoice
 {
-	public const TYPES = [
+	const TYPES = [
 		0 => "Magánszemély",
 		1 => "Cég"
 	];
@@ -35,15 +37,16 @@ class Invoice
 
     /**
      * @var string
+     * @Assert\NotBlank
      *
      * @ORM\Column(name="name", type="string", length=255)
      */
     private $name;
 
     /**
-     * @var int
+     * @var string
      *
-     * @ORM\Column(name="phone_number", type="integer", nullable=true)
+     * @ORM\Column(name="phone_number", type="string", length=30, nullable=true)
      */
     private $phoneNumber;
 
@@ -62,12 +65,14 @@ class Invoice
 
     /**
      * @var int
+     * @Assert\NotBlank
      *
      * @ORM\Column(name="zip_code", type="integer")
      */
     private $zipCode;
 
 	/**
+     * @Assert\NotBlank
 	 * @ORM\ManyToOne(targetEntity="City")
 	 * @ORM\JoinColumn(name="city", referencedColumnName="id")
 	 */
@@ -75,10 +80,31 @@ class Invoice
 
     /**
      * @var string
+     * @Assert\NotBlank
      *
      * @ORM\Column(name="street_and_number", type="string", length=255)
      */
     private $streetAndNumber;
+
+    /**
+     * @ORM\OneToMany(targetEntity="Orders", mappedBy="invoice")
+     */
+    private $orders;
+
+    /**
+     * @Assert\Callback
+     */
+    public function validate(ExecutionContextInterface $context, $payload)
+    {
+        if (
+            "Cég" == self::TYPES[$this->type] &&
+            empty($this->taxNumber)
+        ) {
+            $context->buildViolation('Cég esetében az adószám kötelező')
+                ->atPath('taxNumber')
+                ->addViolation();
+        }
+    }
 
 
     /**
@@ -282,5 +308,7 @@ class Invoice
     {
         return $this->streetAndNumber;
     }
+
+
 }
 

@@ -28,19 +28,56 @@
               background-color: rgba(0,0,0, 0.3);
             }
 
-            .red {
-                color: red;
+            .red, .form-error li {
+                color: red !important;
             }
             .blue {
                 color: blue;
             }
+            .bg-gray {
+                background-color: #cccccc;
+            }
             .p-5 {
                 padding: 15px;
             }
+            form .row,
+            .form-group {
+                margin-top: 15px;
+            }
+            .d-none {
+                display: none;
+            }
         </style>
+        <script>
+            // navbar show active
+            $(document).ready(function () {
+                $("nav a[href='"+window.location+"'").closest('li').addClass("active");
+            })
+        </script>
     </head>
     <body>
-        {% block body %}{% endblock %}
+        <div class="container">
+            {% for msg in app.session.flashBag.get('success') %}
+                <div class="alert alert-success">
+                    {{ msg }}
+                </div>
+            {% endfor %}
+            {% for msg in app.session.flashBag.get('error') %}
+                <div class="alert alert-danger">
+                    {{ msg }}
+                </div>
+            {% endfor %}
+            <nav class="navbar navbar-default">
+                <div class="container-fluid">
+                    <ul class="nav navbar-nav">
+                        <li><a href="{{ url('invoice/list') }}">Számlázási címeim</a></li>
+                        <li><a href="{{ url('order') }}">Megrendelés</a></li>
+                        <li><a href="{{ url('order/list') }}">Megrendelések listázása</a></li>
+                    </ul>
+                </div>
+            </nav>
+            {% block body %}{% endblock %}
+        </div>
         {% block javascripts %}{% endblock %}
     </body>
 </html>

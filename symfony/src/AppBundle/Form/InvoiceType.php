@@ -2,6 +2,10 @@
 
 namespace AppBundle\Form;
 
+use AppBundle\Entity\City;
+use AppBundle\Entity\Country;
+use AppBundle\Entity\Invoice;
+use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
@@ -19,23 +23,34 @@ class InvoiceType extends AbstractType
     {
         $builder
 			->add('type', ChoiceType::class, [
-				'choices' => [
-					'Magánszemély' => '0',
-					'Cég' => '1'
-				],
-				'label' => 'Típus'
+				'choices' => array_flip(Invoice::TYPES),
+				'label' => 'Típus',
 			])
 			->add('name', TextType::class, [
-				'label' => 'Név/Cégnév'
+				'label' => 'Név/Cégnév',
 			])
 			->add('phoneNumber', IntegerType::class, [
-				'label' => 'Telefonszám'
+				'label' => 'Telefonszám',
+                'required' => false
 			])
-			->add('taxNumber')
-			->add('country')
-			->add('zipCode')
-			->add('streetAndNumber')
-			->add('city')
+			->add('taxNumber', TextType::class, [
+                'label' => 'Adószám',
+                'required' => false
+            ])
+			->add('country', EntityType::class, [
+                'class' => Country::class,
+                'label' => 'Ország',
+            ])
+			->add('zipCode', IntegerType::class, [
+                'label' => 'Irányítószám',
+            ])
+			->add('streetAndNumber', TextType::class, [
+                'label' => 'Utca, házszám',
+            ])
+			->add('city', EntityType::class, [
+                'class' => City::class,
+                'label' => 'Város',
+            ])
 		;
     }
     

@@ -2,7 +2,7 @@ version: "3.2"
 
 services:
   web_db:
-    image: mariadb:5.5.64
+    image: mariadb:10.6
     environment:
       MYSQL_ROOT_PASSWORD: webmotion
       MYSQL_DATABASE: webmotion
