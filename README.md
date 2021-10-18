@@ -21,7 +21,7 @@
 ```
 docker-compose exec backend /bin/bash
 composer install
-php bin/console doctrine:schema:update
+php bin/console doctrine:schema:update --force
 ```
 
 **Run dumps**
