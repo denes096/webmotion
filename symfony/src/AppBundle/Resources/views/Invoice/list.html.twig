@@ -1,0 +1,130 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+
+    {{ form_start(form) }}
+
+        {{ form_widget(form) }}
+
+        {% if editMode is defined and editMode == true %}
+            <div class="text-center p-5">
+                <button class="btn btn-success" type="submit">MÓDOSÍTÁSOK MENTÉSE</button>
+                <a class="btn btn-danger btn-cancel" data-url="{{ url('invoice/list') }}" type="submit">MÉGSE</a>
+            </div>
+        {%  else %}
+            <div class="text-center p-5">
+                <button class="btn btn-danger" type="submit">ÚJ CÍM FELVÉTELE</button>
+            </div>
+        {% endif %}
+
+    {{ form_end(form) }}
+
+    <div class="row">
+        <div class="col">
+            <table class="table">
+                <thead class="thead-light">
+                <tr>
+                    <th scope="col">Típus</th>
+                    <th scope="col">Név</th>
+                    <th scope="col">Telefonszám</th>
+                    <th scope="col">Adószám</th>
+                    <th scope="col">Ország</th>
+                    <th scope="col">Irányítószám</th>
+                    <th scope="col">Város</th>
+                    <th scope="col">Utca</th>
+                    <th scope="col">Műveletek</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% if invoices is empty %}
+                    <tr><td colspan="9" class="text-center">Nincs adat</td></tr>
+                {% else %}
+                    {% for invoice in invoices %}
+                        <tr>
+                            <td>{{ types[invoice.type] }}</td>
+                            <td>{{ invoice.name }}</td>
+                            <td>{{ invoice.phoneNumber }}</td>
+                            <td>{{ invoice.taxNumber }}</td>
+                            <td>{{ invoice.country }}</td>
+                            <td>{{ invoice.zipCode }}</td>
+                            <td>{{ invoice.city }}</td>
+                            <td>{{ invoice.streetAndNumber }}</td>
+                            <td>
+                                <a href="{{ url('invoice/edit', {'id': invoice.id} ) }}"><i class="fa fa-2x fa-pencil blue"></i></a>
+                                <a href="{{ url('invoice/delete', {'id': invoice.id} ) }}"><i class="fa fa-2x fa-trash red"></i></a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block stylesheets %}
+    <style>
+        input[type="number"]::-webkit-outer-spin-button, input[type="number"]::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        input[type="number"] {
+            -moz-appearance: textfield;
+        }
+    </style>
+{% endblock %}
+
+{% block javascripts %}
+    <script>
+        $( document ).ready(function() {
+            // cancel redirect to its url
+            $(".btn-cancel").on('click', function (e) {
+                e.preventDefault();
+
+                window.location.href = $(this).data("url");
+            })
+
+            $("#appbundle_invoice_type").on('change', function () {
+                const tax = $("#appbundle_invoice_taxNumber");
+
+                if ($(this).val() == 1) {
+                    tax.attr('required', true).closest('div').find('label').addClass('required');
+                } else {
+                    tax.attr('required', false).closest('div').find('label').removeClass('required');
+                }
+            })
+            $("#appbundle_invoice_type").trigger('change');
+
+            // check values before form submit
+            $("form").submit(function (e) {
+                e.preventDefault();
+
+                let found = true;
+                if ($("#appbundle_invoice_type").val() == 1) {
+                    const regex = /^\d{8}-\d-\d\d$/g;
+                    found = $("#appbundle_invoice_taxNumber").val().match(regex);
+                }
+
+
+                if (found && found.length || found == true) {
+                    $(".tax-error").remove();
+                    $(this).unbind().submit();
+                } else {
+                    $("#appbundle_invoice_taxNumber").after(
+                        '<div class="form-error tax-error">' +
+                            '<span class="help-block">' +
+                                '<ul class="list-unstyled">' +
+                                    '<li>' +
+                                    '<span class="glyphicon glyphicon-exclamation-sign"></span>' +
+                                        'Helytelen adószám formátum!' +
+                                    '</li>' +
+                                '</ul>' +
+                             '</span>'+
+                    '</div>');
+                }
+            });
+        });
+    </script>
+{% endblock %}

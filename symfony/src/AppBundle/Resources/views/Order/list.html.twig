@@ -1,0 +1,46 @@
+{% extends "::base.html.twig" %}
+
+{% block title %}AppBundle:Order:list{% endblock %}
+
+{% block body %}
+    <div class="row">
+        <div class="col">
+            <table class="table">
+                <thead class="thead-light">
+                <tr>
+                    <th scope="col">Sorszám</th>
+                    <th scope="col">Végösszeg</th>
+                    <th scope="col">Típus</th>
+                    <th scope="col">Név</th>
+                    <th scope="col">Telefonszám</th>
+                    <th scope="col">Adószám</th>
+                    <th scope="col">Ország</th>
+                    <th scope="col">Irányítószám</th>
+                    <th scope="col">Város</th>
+                    <th scope="col">Utca</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% if orders is empty %}
+                    <tr><td colspan="9" class="text-center">Nincs adat</td></tr>
+                {% else %}
+                    {% for order in orders %}
+                        <tr>
+                            <td>{{ order.id }}</td>
+                            <td>{{ order.summary }}</td>
+                            <td>{{ types[order.invoice.type] }}</td>
+                            <td>{{ order.invoice.name }}</td>
+                            <td>{{ order.invoice.phoneNumber }}</td>
+                            <td>{{ order.invoice.taxNumber }}</td>
+                            <td>{{ order.invoice.country }}</td>
+                            <td>{{ order.invoice.zipCode }}</td>
+                            <td>{{ order.invoice.city }}</td>
+                            <td>{{ order.invoice.streetAndNumber }}</td>
+                        </tr>
+                    {% endfor %}
+                {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+{% endblock %}

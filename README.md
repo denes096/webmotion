@@ -1,7 +1,8 @@
-# Currency Converter Antavo
+# Webmotion project
 
 - Requirements:
   - Docker
+- Note: compatible with Apple Silicon
   
 ## Project setup:
 **Clone the repo**

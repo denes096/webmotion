@@ -1,0 +1,184 @@
+{% extends "::base.html.twig" %}
+
+{% block title %}AppBundle:Order:index{% endblock %}
+
+{% block body %}
+
+    {{ form_start(form) }}
+    <div class="bg-gray">
+        <div>
+            Nettó végösszeg: <strong>17,999 Ft</strong>
+            <input type="hidden" name="order_netto" value="17,999 Ft">
+        </div>
+        <div>
+            Áfa végösszeg: <strong>4,857 Ft</strong>
+            <input type="hidden" name="order_tax" value="4,857 Ft">
+        </div>
+        <div>
+            Bruttó végösszeg: <strong class="red">22,847 Ft</strong>
+            <input type="hidden" name="order_summary" value="22,847 Ft">
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label class="control-label required" for="select_address">
+            Számlázási cím
+        </label>
+        <select id="select_address" name="order_invoice" class="form-control">
+            {% for invoice in invoices %}
+                <option value="{{ invoice.id }}">
+                    {{ "#{invoice.name}. - #{invoice.country} #{invoice.zipCode} #{invoice.city} #{invoice.streetAndNumber}" }}
+                </option>
+            {% endfor %}
+            <option value="new" {{ hasFormErrors ? "selected" : "" }}>Új számlázási címet adok meg</option>
+        </select>
+    </div>
+
+    <div class="new-address-container {{ (invoices is empty or hasFormErrors == true) ? "" : "d-none" }}">
+        <div class="row">
+            <div class="col-sm-6">
+                {{ form_label(form.type) }}
+                {{ form_widget(form.type) }}
+                <div class="form-error">
+                    {{ form_errors(form.type) }}
+                </div>
+            </div>
+            <div class="col-sm-6">
+                {{ form_label(form.name) }}
+                {{ form_widget(form.name) }}
+                <div class="form-error">
+                    {{ form_errors(form.name) }}
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-6">
+                {{ form_label(form.phoneNumber) }}
+                {{ form_widget(form.phoneNumber) }}
+                <div class="form-error">
+                    {{ form_errors(form.phoneNumber) }}
+                </div>
+            </div>
+            <div class="col-sm-6">
+                {{ form_label(form.taxNumber) }}
+                {{ form_widget(form.taxNumber) }}
+                <div class="form-error">
+                    {{ form_errors(form.taxNumber) }}
+                    <li class="wrong-tax-number d-none">Helytelen adószám formátum!</li>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-6">
+                {{ form_label(form.country) }}
+                {{ form_widget(form.country) }}
+                <div class="form-error">
+                    {{ form_errors(form.country) }}
+                </div>
+            </div>
+            <div class="col-sm-6">
+                {{ form_label(form.zipCode) }}
+                {{ form_widget(form.zipCode) }}
+                <div class="form-error">
+                    {{ form_errors(form.zipCode) }}
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-6">
+                {{ form_label(form.city) }}
+                {{ form_widget(form.city) }}
+                <div class="form-error">
+                    {{ form_errors(form.city) }}
+                </div>
+            </div>
+            <div class="col-sm-6">
+                {{ form_label(form.streetAndNumber) }}
+                {{ form_widget(form.streetAndNumber) }}
+                <div class="form-error">
+                    {{ form_errors(form.streetAndNumber) }}
+                </div>
+            </div>
+        </div>
+        {{ form_widget(form._token) }}
+    </div>
+    <div class="form-group">
+        <input type="checkbox" id="accept" required>
+        <label class="control-label required" for="accept">Kijelentem, hogy elolvastam és elfogadom az általános szerződési feltételeket</label>
+    </div>
+    <div class="text-center p-5">
+        <button class="btn btn-danger" type="submit">MEGRENDELÉS</button>
+    </div>
+    {{ form_end(form, {render_rest: false}) }}
+
+{% endblock %}
+
+{% block javascripts %}
+    <script>
+        $(document).ready(function () {
+            $("#select_address").on('change', function (e) {
+                let val = $(this).val();
+                let addressContainer = $(".new-address-container");
+
+                if (val == 'new') {
+                    addressContainer.removeClass("d-none").show();
+                    addRequiredFromInputs(addressContainer);
+                } else {
+                    addressContainer.hide();
+                    removeRequiredFromInputs(addressContainer);
+                }
+            })
+
+            function removeRequiredFromInputs(container) {
+                container.find('select[required]').prop('required', false).attr('data-was-required', true);
+                container.find('input[required]').prop('required', false).attr('data-was-required', true);
+            }
+            removeRequiredFromInputs($('.new-address-container'));
+
+            function addRequiredFromInputs(container) {
+                container.find('select[data-was-required="true"]').prop('required', true);
+                container.find('input[data-was-required="true"]').prop('required', true);
+            }
+
+            $("#appbundle_invoice_type").on('change', function () {
+                const tax = $("#appbundle_invoice_taxNumber");
+
+                if ($(this).val() == 1) {
+                    tax.attr('required', true).closest('div').find('label').addClass('required');
+                } else {
+                    tax.attr('required', false).closest('div').find('label').removeClass('required');
+                }
+            })
+            $("#appbundle_invoice_type").trigger('change');
+
+            // check values before form submit
+            $("form").submit(function (e) {
+                e.preventDefault();
+
+                let found = true;
+                if ($("#appbundle_invoice_type").val() == 1) {
+                    const regex = /^\d{8}-\d-\d\d$/g;
+                    found = $("#appbundle_invoice_taxNumber").val().match(regex);
+                }
+
+
+                if (found && found.length || found == true) {
+                    $(".tax-error").remove();
+                    $(this).unbind().submit();
+                } else {
+                    $("#appbundle_invoice_taxNumber").after(
+                        '<div class="form-error tax-error">' +
+                        '<span class="help-block">' +
+                        '<ul class="list-unstyled">' +
+                        '<li>' +
+                        '<span class="glyphicon glyphicon-exclamation-sign"></span>' +
+                        'Helytelen adószám formátum!' +
+                        '</li>' +
+                        '</ul>' +
+                        '</span>'+
+                        '</div>');
+                }
+            });
+        })
+    </script>
+{% endblock %}
