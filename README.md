@@ -27,21 +27,7 @@ php bin/console doctrine:schema:update --force
 
 **Run dumps**
 ```
-INSERT INTO `city` (`id`, `name`) VALUES
-(1, 'Szeged'),
-(2, 'Budapest'),
-(3, 'Szolnok'),
-(4, 'Eger'),
-(5, 'Esztergom'),
-(6, 'Csongrád');
-
-
-INSERT INTO `country` (`id`, `name`) VALUES
-(1, 'Magyarország'),
-(2, 'Anglia'),
-(3, 'Németország'),
-(4, 'Szerbia'),
-(5, 'Románia');
+php bin/console app:load-fixtures
 ```
 
 **Visit the domains**
